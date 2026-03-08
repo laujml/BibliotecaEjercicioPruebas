@@ -2,21 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
-        Role::firstOrCreate(['name' => 'student']);
-        Role::firstOrCreate(['name' => 'teacher']);
-        Role::firstOrCreate(['name' => 'librarian']);
+        // Crear roles si no existen
+        $studentRole = Role::firstOrCreate(['name' => 'student']);
+        $teacherRole = Role::firstOrCreate(['name' => 'teacher']);
+        $librarianRole = Role::firstOrCreate(['name' => 'librarian']);
+
+        // Crear usuario estudiante
+        $student = User::firstOrCreate(
+            ['email' => 'estudiante@test.com'],
+            [
+                'name' => 'Estudiante Test',
+                'password' => bcrypt('test123'),
+            ]
+        );
+        $student->assignRole($studentRole);
+
+        // Crear usuario docente
+        $teacher = User::firstOrCreate(
+            ['email' => 'docente@test.com'],
+            [
+                'name' => 'Docente Test',
+                'password' => bcrypt('test123'),
+            ]
+        );
+        $teacher->assignRole($teacherRole);
+
+        // Crear usuario bibliotecario
+        $librarian = User::firstOrCreate(
+            ['email' => 'bibliotecario@test.com'],
+            [
+                'name' => 'Bibliotecario Test',
+                'password' => bcrypt('test123'),
+            ]
+        );
+        $librarian->assignRole($librarianRole);
+
     }
 }
