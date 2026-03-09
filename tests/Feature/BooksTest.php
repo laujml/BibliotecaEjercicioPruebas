@@ -107,8 +107,6 @@ test('teacher can get book detail', function () {
     $response->assertStatus(200);
 });
 
-// Create
-
 test('librarian can create a book', function () {
     $user = User::factory()->librarian()->create();
     $payload = Book::factory()->make()->toArray();
@@ -144,8 +142,6 @@ test('teacher cannot create a book', function () {
     $response->assertStatus(403);
 });
 
-// Update
-
 test('librarian can update a book', function () {
     $user = User::factory()->librarian()->create();
     $book = Book::factory()->create(['title' => 'Old title']);
@@ -180,8 +176,6 @@ test('teacher cannot update a book', function () {
 
     $response->assertStatus(403);
 });
-
-// Delete
 
 test('librarian can delete a book', function () {
     $user = User::factory()->librarian()->create();
@@ -224,4 +218,3 @@ test('librarian can get book detail', function () {
     $response->assertStatus(200);
 });
 
-// Correr pruebas: php artisan test --filter=BooksTest
