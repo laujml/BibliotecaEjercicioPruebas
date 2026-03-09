@@ -24,4 +24,9 @@ class BookController extends Controller
 
         return response()->json(BookResource::collection($books));
     }
+
+    public function show(Book $book)
+    {
+        return response()->json($book, 200);
+    }
 }
