@@ -6,13 +6,11 @@ use App\Http\Requests\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
 use App\Models\Book;
 use App\Models\Loan;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $loans = Loan::with('book')->paginate();
@@ -20,52 +18,73 @@ class LoanController extends Controller
         return response()->json(LoanResource::collection($loans));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreLoanRequest $request)
     {
+        $this->authorize('create', Loan::class);
+
         $book = Book::find($request->input('book_id'));
 
         if (! $book->is_available || $book->available_copies === 0) {
-            return response()->json(['message' => 'Book is not available'], 422);
+            return response()->json(
+                ['message' => 'No hay copias disponibles para este libro.'],
+                422
+            );
         }
 
         $loan = Loan::create([
             'requester_name' => $request->input('requester_name'),
-            'book_id' => $request->input('book_id'),
+            'book_id'        => $request->input('book_id'),
+            'user_id'        => auth()->id(),
         ]);
 
         $book->update([
             'available_copies' => $book->available_copies - 1,
-            'is_available' => $book->available_copies - 1 > 0,
+            'is_available'     => $book->available_copies - 1 > 0,
         ]);
 
-        return response()->json($loan, 201);
-
+        return response()->json(
+            ['message' => 'Prestamo registrado exitosamente.', 'data' => $loan],
+            201
+        );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function return(Loan $loan): JsonResponse
     {
-        //
+        $this->authorize('return', $loan);
+
+        if (! is_null($loan->return_at)) {
+            return response()->json(
+                ['message' => 'Este prestamo ya fue devuelto.'],
+                422
+            );
+        }
+
+        $loan->update(['return_at' => now()]);
+
+        $loan->book->update([
+            'available_copies' => $loan->book->available_copies + 1,
+            'is_available'     => true,
+        ]);
+
+        return response()->json(
+            ['message' => 'Devolucion registrada exitosamente.', 'data' => $loan->fresh()]
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function history(Request $request): JsonResponse
     {
-        //
+        $user = $request->user();
+
+        $loans = $user->role === 'bibliotecario'
+            ? Loan::with('book')->latest()->get()
+            : Loan::with('book')->where('user_id', $user->id)->latest()->get();
+
+        return response()->json(['data' => $loans]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    public function show(string $id) {}
+
+    public function update(Request $request, string $id) {}
+
+    public function destroy(string $id) {}
 }
