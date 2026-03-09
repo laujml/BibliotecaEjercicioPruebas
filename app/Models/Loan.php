@@ -13,9 +13,15 @@ class Loan extends Model
     protected $fillable = [
         'requester_name',
         'book_id',
+        'user_id',
         'return_at',
     ];
 
+    protected $casts = [
+        'return_at' => 'datetime',
+    ];
+
+    // El préstamo está activo si no tiene fecha de devolución
     public function isActive(): Attribute
     {
         return Attribute::make(
@@ -26,5 +32,10 @@ class Loan extends Model
     public function book()
     {
         return $this->belongsTo(Book::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
