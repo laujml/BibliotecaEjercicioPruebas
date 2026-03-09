@@ -29,4 +29,42 @@ class BookController extends Controller
     {
         return response()->json($book, 200);
     }
+
+    /**
+     * Store a newly created book.
+     */
+    public function store(\App\Http\Requests\StoreBookRequest $request)
+    {
+        $this->authorize('create', Book::class);
+
+        $data = $request->validated();
+
+        $book = Book::create($data);
+
+        return response()->json($book, 201);
+    }
+
+    /**
+     * Update an existing book.
+     */
+    public function update(\App\Http\Requests\UpdateBookRequest $request, Book $book)
+    {
+        $this->authorize('update', $book);
+
+        $book->update($request->validated());
+
+        return response()->json($book, 200);
+    }
+
+    /**
+     * Remove a book from storage.
+     */
+    public function destroy(Book $book)
+    {
+        $this->authorize('delete', $book);
+
+        $book->delete();
+
+        return response()->json(null, 204);
+    }
 }

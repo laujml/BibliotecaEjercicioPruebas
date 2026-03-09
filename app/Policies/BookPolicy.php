@@ -8,7 +8,7 @@ use App\Models\User;
 class BookPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Determina si el usuario puede ver cualquier modelo.
      */
     public function viewAny(User $user): bool
     {
@@ -16,7 +16,7 @@ class BookPolicy
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determina si el usuario puede ver el modelo.
      */
     public function view(User $user, Book $book): bool
     {
@@ -24,31 +24,34 @@ class BookPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determina si el usuario puede crear modelos.
      */
     public function create(User $user): bool
     {
-        return true;
+        // Solo los bibliotecarios pueden crear libros
+        return $user->hasRole('librarian');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determina si el usuario puede actualizar el modelo.
      */
     public function update(User $user, Book $book): bool
     {
-        return true;
+        // Solo los bibliotecarios pueden actualizar libros
+        return $user->hasRole('librarian');
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determina si el usuario puede eliminar el modelo.
      */
     public function delete(User $user, Book $book): bool
     {
-        return true;
+        // solo los bibliotecarios pueden eliminar libros
+        return $user->hasRole('librarian');
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Determina si el usuario puede restaurar el modelo.
      */
     public function restore(User $user, Book $book): bool
     {
@@ -56,7 +59,7 @@ class BookPolicy
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Determina si el usuario puede eliminar permanentemente el modelo.
      */
     public function forceDelete(User $user, Book $book): bool
     {
